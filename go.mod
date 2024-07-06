@@ -1,4 +1,4 @@
-module github.com/raccoon-mh/iamtokenvalidatorpoc/v1
+module github.com/raccoon-mh/iamtokenvalidatorpoc
 
 go 1.22.3
 
