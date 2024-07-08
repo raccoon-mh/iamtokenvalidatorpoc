@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
@@ -43,7 +43,7 @@ func GetPubkeyIamManager(certUrl string) error {
 // tokenString 값을 ParseWithClaims하여 token.Valid를 검증하고 마칩니다.
 // 검증이 성공했을때, error를 반환하지 않습니다. valid 하지 않을시, token is invalid 와 함께 오류 내용을 반환합니다.
 func IsTokenValid(tokenString string) error {
-	token, err := jwt.ParseWithClaims(tokenString, &DefaultClaims{}, keyfunction)
+	token, err := jwt.ParseWithClaims(tokenString, &DefaultClaims{}, Keyfunction)
 	if err != nil {
 		return fmt.Errorf("token is invalid : %s", err.Error())
 	}
@@ -59,7 +59,7 @@ func IsTokenValid(tokenString string) error {
 // ParseWithClaims하여 valid 를 검증하고 IamManagerClaims를 반환합니다.
 // token이 valid 하지 않을시, token is invalid 와 함께 오류 내용을 반환합니다.
 func GetTokenClaimsByIamManagerClaims(tokenString string) (*IamManagerClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &IamManagerClaims{}, keyfunction)
+	token, err := jwt.ParseWithClaims(tokenString, &IamManagerClaims{}, Keyfunction)
 	if err != nil {
 		return nil, fmt.Errorf("token is invalid : %s", err.Error())
 	}
@@ -75,7 +75,7 @@ func GetTokenClaimsByIamManagerClaims(tokenString string) (*IamManagerClaims, er
 // ParseWithClaims하여 valid 를 검증하고 Claims를 반환합니다.
 // token이 valid 하지 않을시, token is invalid 와 함께 오류 내용을 반환합니다.
 func GetTokenClaimsByCustomClaims(tokenString string, myclaims interface{}) (interface{}, error) {
-	token, err := jwt.ParseWithClaims(tokenString, myclaims.(jwt.Claims), keyfunction)
+	token, err := jwt.ParseWithClaims(tokenString, myclaims.(jwt.Claims), Keyfunction)
 	if err != nil {
 		return nil, fmt.Errorf("token is invalid : %s", err.Error())
 	}
@@ -86,8 +86,9 @@ func GetTokenClaimsByCustomClaims(tokenString string, myclaims interface{}) (int
 	}
 }
 
+// Keyfunction은 토큰 검증을 위한 rawkey 를 반환합니다. 미들웨어에서 사용합니다
 // RS256, RS384, RS512 can be Signing Method
-func keyfunction(token *jwt.Token) (interface{}, error) {
+func Keyfunction(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 		return nil, fmt.Errorf("keyfunctionErr : unexpected signing method[%v]: RS256, RS384, RS512 can be Signing Method...", token.Header["alg"])
 	}
